@@ -1,105 +1,37 @@
-# 3D Compound structure generator for molecular docking
+# Virtual screening of small-molecule RIG-I agonists
 
-This project automates the preparation of small-molecule structures for molecular docking by extracting selected compounds from a chemical library, generating optimized three-dimensional conformations, and creating an interactive web-based molecular viewer. The resulting structures can be used as input for docking studies while providing a convenient platform for visual quality assessment.
+## Overview
 
----
-
-## Methodology
-
-### 1. Compound Selection
-
-The script reads an SDF chemical library and automatically identifies user-defined compounds based on their compound identifiers (KIN IDs). Multiple identifier formats (e.g., `KIN-0121148`, `KIN0121148`, and `KIN0001148`) are normalized to ensure accurate compound retrieval regardless of naming convention.
-
-### 2. Three-Dimensional Structure Generation
-
-Each selected molecule is processed using **RDKit**, an open-source cheminformatics toolkit.
-
-The workflow consists of:
-
-- Removal of existing hydrogen atoms
-- Addition of explicit hydrogens
-- Three-dimensional conformer generation using the **ETKDG v3 (Experimental-Torsion Knowledge Distance Geometry)** algorithm
-- Geometry optimization using the **MMFF94 (Merck Molecular Force Field)** to obtain a low-energy molecular conformation suitable for docking studies
-
-If ETKDG fails to generate a conformer, the script automatically falls back to alternative distance geometry embedding methods to maximize successful structure generation.
-
-### 3. Output Generation
-
-The workflow produces two outputs:
-
-- **`RIGI_compounds_3D.sdf`** — optimized 3D molecular structures suitable for molecular docking software.
-- **`RIGI_compounds_3D.html`** — an interactive browser-based viewer for inspecting each compound prior to docking.
-
----
-
-## Interactive 3D Viewer
-
-The generated HTML viewer enables rapid visual inspection of every optimized ligand before molecular docking.
-
-### Features
-
-- Browse compounds individually
-- Interactive 3D rotation, zooming, and panning
-- Multiple rendering styles
-  - Stick
-  - Sphere
-  - Line
-  - Cross
-- Van der Waals surface visualization
-- Light/Dark background switching
-- Automatic 2D structure thumbnails
-- Heavy atom count display
-- Browser-based interface
-- 
-**Open the viewer here:**
-
-`RIGI_compounds_3D.html`
-
----
+A computational pipeline for preparing small-molecule libraries, identifying potential binding pockets in RIG-I, and prioritizing candidate compounds through structure-based virtual screening.
 
 ## Workflow
 
-```text
-Library_export_11OCT.sdf
-           │
-           ▼
-Compound ID Matching
-           │
-           ▼
-Target Compound Extraction
-           │
-           ▼
-RDKit Processing
-(Remove H → Add H)
-           │
-           ▼
-ETKDG v3 Conformer Generation
-           │
-           ▼
-MMFF94 Energy Minimization
-           │
-     ┌─────┴──────────┐
-     ▼                ▼
-3D Docking SDF   Interactive HTML Viewer
-```
+1. **Compound preparation:** Extract candidate molecules from SDF libraries, generate 3D conformations using RDKit (ETKDGv3), and minimize structures with MMFF94.
+2. **Binding-pocket identification:** Identify potential druggable pockets using DoGSiteScorer.
+3. **Molecular docking:** Dock 14 candidate compounds to full-length RIG-I and its C-terminal domain (CTD) using AutoDock Vina.
+4. **Candidate prioritization:** Compare predicted binding affinities across targets and docking modes to rank compounds for further investigation.
 
----
+## Tools
 
-# Results
+Python, RDKit, Open Babel, DoGSiteScorer, AutoDock Vina.
 
-The workflow successfully extracted the selected RIG-I compounds from the screening library and generated optimized three-dimensional conformations using RDKit. 
-Initial conformers were generated with the ETKDG v3 algorithm, which combines distance geometry with experimentally derived torsional preferences to produce chemically realistic structures. 
-Each conformer was subsequently refined using MMFF94 energy minimization to obtain low-energy geometries appropriate for downstream molecular docking. 
-The final structures were exported as a docking-ready SDF file and visualized through an interactive HTML interface.
+## Key Outputs
 
----
+* Prepared 3D compound structures
+* Binding-pocket analysis results for full lengths RIGI
+  The highest-scoring pocket overlaps the conserved nucleotide-binding site in the RIG-I helicase domain. This region contains Motif I (GCGKT; residues 267–271), including Lys270, and Motif II (DECH; residues 372–375), which are key components of the ATPase machinery (Jiang et al., 2011).
+  <img width="1401" height="898" alt="Screenshot 2026-09-30 at 10 48 56 PM" src="https://github.com/user-attachments/assets/fb1058db-d7f0-4890-acab-fc5bb7c6d865" />
+  
+* Docking scores and candidate rankings
+  
+  <img width="603" height="314" alt="Screenshot 2026-09-29 at 10 42 31 PM" src="https://github.com/user-attachments/assets/09509390-2650-4d45-ba0c-e1148d2aa826" />
 
-## Methods and Tools
+* Binding-pocket analysis results for CTD domain of RIGI
+  Predicted binding pockets on the RIG-I C-Terminal domain. Pockets were identified using DoGSiteScorer (Volkamer et al., 2012) on the RIG-I CTD structure (PDB 2QFB). Pocket P0 had a volume of 417.86 Å³ and a drug score of 0.62, whereas pocket P1 had a volume of 537.57 Å³ and a drug score of 0.50. (A) Pocket P0 is lined by residues including His830, Phe853, Lys858, Lys861, Lys888, and Lys907 and overlaps the positively charged groove proposed as the 5′-triphosphate-binding site (Cui et al., 2008), P0 scores therefore indicate possible competition with 5′ppp RNA. (B) Pocket P1 is lined by residues 803–806, 820–824, 831, and 911–916; no specific functional role has been assigned to this site.
 
-- Python
-- RDKit
-- ETKDG v3 conformer generation
-- MMFF94 force-field optimization
-- HTML
-- JavaScript
-- 3Dmol.js
+* Docking scores and candidate rankings
+  <img width="932" height="490" alt="Screenshot 2026-09-30 at 9 21 18 PM" src="https://github.com/user-attachments/assets/4f740622-c96f-40a9-bdb1-dfd0f2e628a3" />
+
+## Limitations
+
+Docking scores and predicted binding poses are computational predictions and do not establish RIG-I agonist activity. Experimental validation is required to determine biological activity.
